@@ -1,11 +1,11 @@
+from authlib.integrations.starlette_client import OAuth
 from starlette.responses import RedirectResponse, Response
 from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.staticfiles import StaticFiles
 from fastapi import Request
-from typing import List
-from authlib.integrations.starlette_client import OAuth
 from fastapi import Request, FastAPI
 from fastapi.templating import Jinja2Templates  
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from jinja2 import ChoiceLoader, FileSystemLoader, PackageLoader
 
 import fnmatch
@@ -110,6 +110,8 @@ def install_google_sso(
     return init_routes(app, oauth, login_base_path)
 
 
+
+
 def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
     templates = Jinja2Templates("itutor_google_sso/templates")
     templates.env.loader = ChoiceLoader(
@@ -118,6 +120,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
             PackageLoader("fastapi_middlewares", "itutor_google_sso/templates"),
         ]
     )
+    app.mount("/sso-statics", app=StaticFiles(directory='static'), name="sso-statics"),
 
     @app.get(f"{login_base_path}/login/google", include_in_schema=False)
     async def google_sso(request: Request):

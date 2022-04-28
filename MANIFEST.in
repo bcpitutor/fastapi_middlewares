@@ -1,3 +1,2 @@
 include README.md
-include LICENSE.md
 recursive-include fastapi_middlewares/itutor_google_sso/templates *

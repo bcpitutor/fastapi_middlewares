@@ -9,6 +9,8 @@ from typing import Dict, Optional
 
 import fnmatch
 
+LOGOUT_FUNCTION = "google_sso_logout"
+
 class iTutorGoogleSSORoutesMiddleware:
     """
     Middleware to define which routes need to be validated with @itutor.com google sso
@@ -109,7 +111,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
 
 
     @app.get(f"{login_base_path}/login", include_in_schema=False)
-    async def admin_login(request: Request, error_message: Optional[str] = None):
+    async def google_sso_login(request: Request, error_message: Optional[str] = None):
         # absolute url for callback
         # we will define it below
         auth_url = request.url_for("google_sso")
@@ -134,7 +136,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
 
 
     @app.get("/admin/logout", include_in_schema=False)
-    async def admin_logout(request: Request):
+    async def google_sso_logout(request: Request):
         request.session.pop("user", None)
         login_url = request.url_for("admin_login")
         return RedirectResponse(url=login_url)

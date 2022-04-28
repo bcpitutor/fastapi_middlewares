@@ -1,6 +1,4 @@
-from fastapi_middlewares.itutor_google_sso import (
-    install_google_sso, 
-    iTutorGoogleSSORoutesMiddleware, 
-    LOGIN_FUNCTION,
-    LOGOUT_FUNCTION
-)
+from .itutor_google_sso import install_google_sso as install_google_sso
+from .itutor_google_sso import iTutorGoogleSSORoutesMiddleware as iTutorGoogleSSORoutesMiddleware
+from .itutor_google_sso import LOGIN_FUNCTION as LOGIN_FUNCTION
+from .itutor_google_sso import LOGOUT_FUNCTION as LOGOUT_FUNCTION

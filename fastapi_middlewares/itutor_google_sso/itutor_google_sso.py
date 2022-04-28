@@ -25,6 +25,7 @@ class iTutorGoogleSSORoutesMiddleware:
         app: ASGIApp,
         allowed_routes: List[str],
         protected_routes: List[str],
+        login_url: str
     ) -> None:
         """
         Params:
@@ -37,6 +38,7 @@ class iTutorGoogleSSORoutesMiddleware:
         self.app = app
         self.protected_routes = protected_routes
         self.allowed_routes = allowed_routes
+        self.login_url = login_url
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         request = Request(scope, receive=receive)
@@ -44,20 +46,19 @@ class iTutorGoogleSSORoutesMiddleware:
         if self._is_allowed(path):
             await self.app(scope, receive, send)
             return 
-        login_url = request.url_for(LOGIN_FUNCTION)
         if self._is_protected(path):
             response: Response
             user = request.session.get('user')
             if not user:
                 message = 'Unauthenticated.'
-                response = RedirectResponse(f"{login_url}?error_message={str(message)}")
+                response = RedirectResponse(f"{self.login_url}?error_message={str(message)}")
                 await response(scope, receive, send)
                 return 
             email: str = user.get("email")
             _, provider = email.split("@")
             if provider != "itutor.com":
                message = "Sorry, only @itutor.com email addresses are allowed."
-               response = RedirectResponse(f"{login_url}?error_message={str(message)}")
+               response = RedirectResponse(f"{self.login_url}?error_message={str(message)}")
                await response(scope, receive, send)
                return 
 

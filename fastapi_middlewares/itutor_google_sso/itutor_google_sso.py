@@ -89,6 +89,14 @@ def install_google_sso(
     login_base_path: Optional[str] = "/admin",
     scope_kwargs: Dict[str,str] = {"scope": "openid email profile"}
     ) -> FastAPI:
+    """
+    Install google sso routes for login and logout
+    Params:
+        -  `client_id`: `string`, Google Oauth client_id.
+        -  `client_secret`: `string`, Google Oauth client_secret.
+        -  `login_base_path`: `string`, base url for the login form.
+        -  `scope_kwargs`: `Dict[str,str]`, scope requested to the client.
+    """
     oauth = OAuth()
     oauth.register(
         "google",

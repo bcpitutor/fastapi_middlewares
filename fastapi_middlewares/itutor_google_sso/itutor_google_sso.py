@@ -138,7 +138,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
     @app.get("/admin/logout", include_in_schema=False)
     async def google_sso_logout(request: Request):
         request.session.pop("user", None)
-        login_url = request.url_for("admin_login")
+        login_url = request.url_for(LOGIN_FUNCTION)
         return RedirectResponse(url=login_url)
     
     return app

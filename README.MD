@@ -2,6 +2,12 @@
 
 This package provide useful middlewares for our FastAPI microservices
 
+## Installation
+
+```bash
+pip install git+https://github.com/bcpitutor/fastapi_middlewares
+```
+
 ## Middlewares:
 
 ### iTutorGoogleSSORoutesMiddleware

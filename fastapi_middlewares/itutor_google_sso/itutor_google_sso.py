@@ -6,6 +6,7 @@ from authlib.integrations.starlette_client import OAuth
 from fastapi import Request, FastAPI
 from fastapi.templating import Jinja2Templates  
 from typing import Dict, Optional
+from jinja2 import ChoiceLoader, FileSystemLoader, PackageLoader
 
 import fnmatch
 
@@ -16,9 +17,10 @@ class iTutorGoogleSSORoutesMiddleware:
     """
     Middleware to define which routes need to be validated with @itutor.com google sso
     Params:
+        -  `app`: Starlette of FastAPI instance
         -  `allowed_routes`: List with allowed routes routes, if a path is present here will not be validated if is protected, it supports asterisk. I.E `/admin/*`
         -  `protected_routes`: List with protected routes, it supports asterisk. I.E `/admin/*`
-        -  `redirect_path`: Path to redirect when user is not authorized.
+        -  `login_url`: Path to login form.
     """
     def __init__(
         self,
@@ -32,7 +34,7 @@ class iTutorGoogleSSORoutesMiddleware:
           -  `app`: Starlette of FastAPI instance
           -  `allowed_routes`: List with allowed routes routes, if a path is present here will not be validated if is protected, it supports asterisk. I.E `/admin/*`
           -  `protected_routes`: List with protected routes, it supports asterisk. I.E `/admin/*`
-          -  `redirect_path`: Path to redirect when user is not authorized.
+          -  `login_url`: Path to login form.
         """
 
         self.app = app
@@ -109,7 +111,14 @@ def install_google_sso(
 
 
 def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
-    admin_templates = Jinja2Templates(directory="templates/admin")
+    templates = Jinja2Templates("itutor_google_sso/templates")
+    templates.env.loader = ChoiceLoader(
+        [
+            FileSystemLoader("itutor_google_sso/templates"),
+            PackageLoader("fastapi_middlewares", "itutor_google_sso/templates"),
+        ]
+    )
+
     @app.get(f"{login_base_path}/login/google", include_in_schema=False)
     async def google_sso(request: Request):
         # absolute url for callback
@@ -123,7 +132,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
         # absolute url for callback
         # we will define it below
         auth_url = request.url_for("google_sso")
-        return admin_templates.TemplateResponse(
+        return templates.TemplateResponse(
             "login.html",
             {
                 "request": request,
@@ -140,7 +149,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
         user = token.get("userinfo")
         if user:
             request.session["user"] = dict(user)
-        return RedirectResponse(url="/admin/")
+        return RedirectResponse(url=f"/{login_base_path}/")
 
 
     @app.get("/admin/logout", include_in_schema=False)

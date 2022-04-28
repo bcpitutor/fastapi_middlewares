@@ -10,6 +10,7 @@ from typing import Dict, Optional
 import fnmatch
 
 LOGOUT_FUNCTION = "google_sso_logout"
+LOGIN_FUNCTION = "google_sso_login"
 
 class iTutorGoogleSSORoutesMiddleware:
     """
@@ -24,7 +25,6 @@ class iTutorGoogleSSORoutesMiddleware:
         app: ASGIApp,
         allowed_routes: List[str],
         protected_routes: List[str],
-        redirect_path: str
     ) -> None:
         """
         Params:
@@ -36,7 +36,6 @@ class iTutorGoogleSSORoutesMiddleware:
 
         self.app = app
         self.protected_routes = protected_routes
-        self.redirect_path = redirect_path
         self.allowed_routes = allowed_routes
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -45,7 +44,7 @@ class iTutorGoogleSSORoutesMiddleware:
         if self._is_allowed(path):
             await self.app(scope, receive, send)
             return 
-        login_url = self.redirect_path
+        login_url = request.url_for(LOGIN_FUNCTION)
         if self._is_protected(path):
             response: Response
             user = request.session.get('user')

@@ -120,7 +120,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
             PackageLoader("fastapi_middlewares", "itutor_google_sso/templates"),
         ]
     )
-    app.mount("/sso-statics", app=StaticFiles(directory='static'), name="sso-statics"),
+    app.mount("/sso-statics", app=StaticFiles(packages=['fastapi_middlewares']), name="sso-statics"),
 
     @app.get(f"{login_base_path}/login/google", include_in_schema=False)
     async def google_sso(request: Request):

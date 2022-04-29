@@ -23,4 +23,4 @@ MANIFEST
 
 *.sw[pon]
 .eggs
-!fastapi_middlewares/static/dist
+!fastapi_middlewares/statics/dist

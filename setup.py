@@ -15,7 +15,8 @@ setup(
         long_description=LONG_DESCRIPTION,
         packages=find_packages(),
         package_dir={'fastapi_middlewares': 'fastapi_middlewares'},
-        package_data={'fastapi_middlewares': ['itutor_google_sso/templates/*', 'static/*']},
+        include_package_data = True,
+        package_data={'fastapi_middlewares': ['static/*', 'itutor_google_sso/templates/*']},
         install_requires=[
             "Authlib==1.0.1", 
             "httpx==0.22.0", 

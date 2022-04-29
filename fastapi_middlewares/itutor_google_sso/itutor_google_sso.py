@@ -152,7 +152,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
         user = token.get("userinfo")
         if user:
             request.session["user"] = dict(user)
-        return RedirectResponse(url=f"/{login_base_path}/")
+        return RedirectResponse(url=f"{login_base_path}/")
 
 
     @app.get("/admin/logout", include_in_schema=False)

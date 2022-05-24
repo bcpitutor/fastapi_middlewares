@@ -23,6 +23,7 @@ from fastapi_middlewares.itutor_google_sso import (
     LOGIN_FUNCTION
 )
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI()
 
@@ -39,6 +40,11 @@ app.add_middleware(
     protected_routes = ["/admin*"],
     login_url = app.url_path_for(LOGIN_FUNCTION)
 )
+
+// SessionMiddleware should be added after iTutorGoogleSSORoutesMiddleware
+// or it is not going to work.
+
+app.add_middleware(SessionMiddleware, secret_key="mySecretKey")
 ```
 ### Description:
 

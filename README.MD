@@ -41,8 +41,8 @@ app.add_middleware(
     login_url = app.url_path_for(LOGIN_FUNCTION)
 )
 
-// SessionMiddleware should be added after iTutorGoogleSSORoutesMiddleware
-// or it is not going to work.
+# SessionMiddleware should be added after iTutorGoogleSSORoutesMiddleware
+# or it is not going to work.
 
 app.add_middleware(SessionMiddleware, secret_key="mySecretKey")
 ```

@@ -39,7 +39,7 @@ class iTutorGoogleSSORoutesMiddleware:
 
         self.app = app
         self.protected_routes = protected_routes
-        self.allowed_routes = allowed_routes
+        self.allowed_routes = allowed_routes + ["/sso-statics*"] #static fields should be exposed
         self.login_url = login_url
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
@@ -144,7 +144,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
             },
         )
 
-    @app.get("/google_auth", include_in_schema=False)
+    @app.get(f"{login_base_path}/google_auth", include_in_schema=False)
     async def auth(request: Request):
         token = await oauth.google.authorize_access_token(request)
         # <=0.15

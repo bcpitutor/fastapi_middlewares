@@ -89,7 +89,10 @@ def install_google_sso(
     client_id: str,
     client_secret: str,
     login_base_path: Optional[str] = "/admin",
-    scope_kwargs: Dict[str,str] = {"scope": "openid email profile"}
+    redirect_after_login: Optional[str] = "/",
+    allowed_routes: List[str] = [],
+    protected_routes: List[str] = [],
+    scope_kwargs: Dict[str,str] = {"scope": "openid email profile"},
     ) -> FastAPI:
     """
     Install google sso routes for login and logout
@@ -97,6 +100,7 @@ def install_google_sso(
         -  `client_id`: `string`, Google Oauth client_id.
         -  `client_secret`: `string`, Google Oauth client_secret.
         -  `login_base_path`: `string`, base url for the login form.
+        -  `redirect_after_login`: `string`, path to redirect after logged in with google sso.
         -  `scope_kwargs`: `Dict[str,str]`, scope requested to the client.
     """
     oauth = OAuth()
@@ -107,12 +111,23 @@ def install_google_sso(
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
         client_kwargs=scope_kwargs,
     )
-    return init_routes(app, oauth, login_base_path)
+    #return init_routes(app, oauth, login_base_path, redirect_after_login)
+    init_routes(app, oauth, login_base_path, redirect_after_login)
+    app.add_middleware(
+    iTutorGoogleSSORoutesMiddleware,
+    allowed_routes = [login_base_path + "*"] + allowed_routes,
+    protected_routes = protected_routes,
+    login_url = app.url_path_for(LOGIN_FUNCTION),
+)
 
 
 
 
-def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
+def init_routes(
+    app: FastAPI, 
+    oauth: OAuth, 
+    login_base_path: str, 
+    redirect_after_login: Optional[str] = "/") -> FastAPI:
     templates = Jinja2Templates("itutor_google_sso/templates")
     templates.env.loader = ChoiceLoader(
         [
@@ -152,7 +167,7 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
         user = token.get("userinfo")
         if user:
             request.session["user"] = dict(user)
-        return RedirectResponse(url=f"{login_base_path}/")
+        return RedirectResponse(url=redirect_after_login)
 
 
     @app.get(f"{login_base_path}/logout", include_in_schema=False)
@@ -160,5 +175,4 @@ def init_routes(app: FastAPI, oauth: OAuth, login_base_path: str) -> FastAPI:
         request.session.pop("user", None)
         login_url = request.url_for(LOGIN_FUNCTION)
         return RedirectResponse(url=login_url)
-    
     return app

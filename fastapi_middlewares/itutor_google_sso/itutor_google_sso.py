@@ -101,6 +101,8 @@ def install_google_sso(
         -  `client_secret`: `string`, Google Oauth client_secret.
         -  `login_base_path`: `string`, base url for the login form.
         -  `redirect_after_login`: `string`, path to redirect after logged in with google sso.
+        -  `allowed_routes`: List with allowed routes routes, if a path is present here will not be validated if is protected, it supports asterisk. I.E `/admin/*`
+        -  `protected_routes`: List with protected routes, it supports asterisk. I.E `/admin/*`
         -  `scope_kwargs`: `Dict[str,str]`, scope requested to the client.
     """
     oauth = OAuth()
@@ -119,9 +121,6 @@ def install_google_sso(
     protected_routes = protected_routes,
     login_url = app.url_path_for(LOGIN_FUNCTION),
 )
-
-
-
 
 def init_routes(
     app: FastAPI, 

@@ -16,9 +16,9 @@ pip-log.txt
 MANIFEST
 
 .idea/*
-
+*pycache*
 .cache
-
+env
 .venv
 
 *.sw[pon]

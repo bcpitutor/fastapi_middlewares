@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1' 
+VERSION = '0.0.2' 
 DESCRIPTION = 'Package for google sso login in FastAPI'
 LONG_DESCRIPTION = 'Package for google sso login in FastAPI'
 

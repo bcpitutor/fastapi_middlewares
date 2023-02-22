@@ -27,7 +27,8 @@ class iTutorGoogleSSORoutesMiddleware:
         app: ASGIApp,
         allowed_routes: List[str],
         protected_routes: List[str],
-        login_url: str
+        login_url: str,
+        allowed_users: Optional[List[str]] = None,
     ) -> None:
         """
         Params:
@@ -35,12 +36,14 @@ class iTutorGoogleSSORoutesMiddleware:
           -  `allowed_routes`: List with allowed routes routes, if a path is present here will not be validated if is protected, it supports asterisk. I.E `/admin/*`
           -  `protected_routes`: List with protected routes, it supports asterisk. I.E `/admin/*`
           -  `login_url`: Path to login form.
+          -  `allowed_users`: If present, only users in this list will be allowed to access the protected routes. Otherwhise all users with @itutor.com domain will be allowed.
         """
 
         self.app = app
         self.protected_routes = protected_routes
         self.allowed_routes = allowed_routes + ["/sso-statics*"] #static fields should be exposed
         self.login_url = login_url
+        self.allowed_users = allowed_users
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         request = Request(scope, receive=receive)
@@ -66,6 +69,11 @@ class iTutorGoogleSSORoutesMiddleware:
                response = RedirectResponse(f"{self.login_url}?error_message={str(message)}")
                await response(scope, receive, send)
                return 
+            if self.allowed_users and email not in self.allowed_users:
+                message = f"Sorry {user.get('name')}, you are not allowed to access this page. Please contact your administrator to get access."
+                response = RedirectResponse(f"{self.login_url}?error_message={str(message)}")
+                await response(scope, receive, send)
+                return
 
         await self.app(scope, receive, send)
 
@@ -92,10 +100,12 @@ def install_google_sso(
     client_id: str,
     client_secret: str,
     login_base_path: Optional[str] = "/admin",
-    redirect_after_login: Optional[str] = "/",
     allowed_routes: List[str] = [],
     protected_routes: List[str] = [],
     scope_kwargs: Dict[str,str] = {"scope": "openid email profile"},
+    allowed_users: Optional[List[str]] = None,
+    *args,
+    **kwargs,
     ) -> FastAPI:
     """
     Install google sso routes for login and logout
@@ -106,6 +116,7 @@ def install_google_sso(
         -  `redirect_after_login`: `string`, path to redirect after logged in with google sso.
         -  `allowed_routes`: List with allowed routes routes, if a path is present here will not be validated if is protected, it supports asterisk. I.E `/admin/*`
         -  `protected_routes`: List with protected routes, it supports asterisk. I.E `/admin/*`
+        -  `allowed_users`: If present, only users in this list will be allowed to access the protected routes. Otherwhise all users with @itutor.com domain will be allowed.
         -  `scope_kwargs`: `Dict[str,str]`, scope requested to the client.
     """
     oauth = OAuth()
@@ -117,20 +128,19 @@ def install_google_sso(
         client_kwargs=scope_kwargs,
     )
     #return init_routes(app, oauth, login_base_path, redirect_after_login)
-    init_routes(app, oauth, login_base_path, redirect_after_login)
+    init_routes(app, oauth, login_base_path)
     app.add_middleware(
     iTutorGoogleSSORoutesMiddleware,
     allowed_routes = [login_base_path + "*"] + allowed_routes,
     protected_routes = protected_routes,
     login_url = app.url_path_for(LOGIN_FUNCTION),
-)
+    allowed_users = allowed_users,
+    )
 
 def init_routes(
     app: FastAPI, 
     oauth: OAuth, 
     login_base_path: str, 
-    *args,
-    **kwargs,
     ) -> FastAPI:
     templates = Jinja2Templates("itutor_google_sso/templates")
     templates.env.loader = ChoiceLoader(

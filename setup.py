@@ -7,7 +7,7 @@ LONG_DESCRIPTION = 'Package for google sso login in FastAPI'
 # Setting up
 setup(
        # the name must match the folder name 'verysimplemodule'
-        name="fastapi_middlewares", 
+        name="itutor_fastapi_middlewares", 
         version=VERSION,
         author="Nicolas Acosta",
         author_email="nicolas.acosta@itutor.com",
@@ -24,14 +24,13 @@ setup(
             "jinja2==3.1.1", 
             "fastapi>=0.75.2", 
         ],
-        url=["https://github.com/bcpitutor/fastapi_middlewares"],
+        url="https://github.com/bcpitutor/fastapi_middlewares",
         keywords=['google-sso', 'fastapi'],
         classifiers= [
             "Development Status :: 3 - Alpha",
-            "Intended Audience :: Engineers",
             "Programming Language :: Python :: 3",
             "Operating System :: MacOS :: MacOS X",
             "Operating System :: Microsoft :: Windows",
-            "Operating System :: Microsoft :: Ubuntu",
+            "Operating System :: POSIX :: Linux",
         ]
 )

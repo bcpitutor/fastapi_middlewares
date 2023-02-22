@@ -1,30 +1,21 @@
 from fastapi_middlewares.itutor_google_sso import (
-    install_google_sso, 
-    iTutorGoogleSSORoutesMiddleware, 
-    LOGIN_FUNCTION
+    install_google_sso
 )
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
-
+import local_config as settings
 
 app = FastAPI()
 
 install_google_sso(
     app=app,
-    client_id="mi-client-id",
-    client_secret="mi-client-secret",
-    login_base_path="/admin/login"
-)
-
-app.add_middleware(
-    iTutorGoogleSSORoutesMiddleware,
-    allowed_routes = ["/admin/login*"],
+    client_id=settings.GOOGLE_CLIENT_ID,
+    client_secret=settings.GOOGLE_CLIENT_SECRET,
+    login_base_path=f"/admin/google_sso",
+    redirect_after_login = "/admin/algo",
     protected_routes = ["/admin*"],
-    login_url = app.url_path_for(LOGIN_FUNCTION)
 )
 
 # SessionMiddleware should be added after iTutorGoogleSSORoutesMiddleware
 # or it is not going to work.
-
 app.add_middleware(SessionMiddleware, secret_key="mySecretKey")
-

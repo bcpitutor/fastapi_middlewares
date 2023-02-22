@@ -24,3 +24,4 @@ env
 *.sw[pon]
 .eggs
 !fastapi_middlewares/statics/dist
+local_config.py

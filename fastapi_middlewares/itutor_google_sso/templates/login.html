@@ -23,6 +23,9 @@
                         </div>
                         <div>
                             <hr/>
+                            {% if error_message %}
+                            <p></p><small class="has-text-danger">{{ error_message }}</small></p>
+                            {% endif %}
                             <a href="{{ redirect_uri_google_sso }}" class="button is-link is-large">
                                 <i class="fab fa-google me-2"></i> &nbsp;Sign in with Google
                             </a>

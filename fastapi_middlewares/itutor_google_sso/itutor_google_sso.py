@@ -7,7 +7,7 @@ from fastapi import Request, FastAPI
 from fastapi.templating import Jinja2Templates  
 from typing import Dict, Optional, List
 from jinja2 import ChoiceLoader, FileSystemLoader, PackageLoader
-
+from urllib.parse import urlencode
 import fnmatch
 
 LOGOUT_FUNCTION = "google_sso_logout"
@@ -52,8 +52,11 @@ class iTutorGoogleSSORoutesMiddleware:
             response: Response
             user = request.session.get('user')
             if not user:
-                message = 'Unauthenticated.'
-                response = RedirectResponse(f"{self.login_url}?error_message={str(message)}")
+                params = urlencode(
+                    {
+                    "redirect_to": path
+                    })
+                response = RedirectResponse(f"{self.login_url}?{params}")
                 await response(scope, receive, send)
                 return 
             email: str = user.get("email")
@@ -126,7 +129,9 @@ def init_routes(
     app: FastAPI, 
     oauth: OAuth, 
     login_base_path: str, 
-    redirect_after_login: Optional[str] = "/") -> FastAPI:
+    *args,
+    **kwargs,
+    ) -> FastAPI:
     templates = Jinja2Templates("itutor_google_sso/templates")
     templates.env.loader = ChoiceLoader(
         [
@@ -137,36 +142,43 @@ def init_routes(
     app.mount("/sso-statics", app=StaticFiles(packages=['fastapi_middlewares']), name="sso-statics"),
 
     @app.get(f"{login_base_path}/login/google", include_in_schema=False)
-    async def google_sso(request: Request):
+    async def google_sso(request: Request, redirect_to: Optional[str] = None):
         # absolute url for callback
         # we will define it below
         redirect_uri = request.url_for("auth")
-        return await oauth.google.authorize_redirect(request, redirect_uri)
+        kwargs = {}
+        if redirect_to:
+            # Using state to pass the redirect_to url
+            # https://developers.google.com/identity/protocols/oauth2/web-server#creatingclient
+            kwargs["state"] = redirect_to
+        return await oauth.google.authorize_redirect(request, redirect_uri, **kwargs)
 
 
     @app.get(f"{login_base_path}/login", include_in_schema=False)
-    async def google_sso_login(request: Request, error_message: Optional[str] = None):
+    async def google_sso_login(request: Request, error_message: Optional[str] = None, redirect_to: Optional[str] = None):
         # absolute url for callback
         # we will define it below
         auth_url = request.url_for("google_sso")
+        if redirect_to:
+            auth_url += f"?{urlencode({'redirect_to': redirect_to})}"
         return templates.TemplateResponse(
             "login.html",
             {
                 "request": request,
                 "redirect_uri_google_sso": auth_url,
-                "error_message": error_message,
+                "error_message": error_message
             },
         )
 
     @app.get(f"{login_base_path}/google_auth", include_in_schema=False)
-    async def auth(request: Request):
+    async def auth(request: Request, state: Optional[str] = None):
         token = await oauth.google.authorize_access_token(request)
         # <=0.15
         # user = await oauth.google.parse_id_token(request, token)
         user = token.get("userinfo")
         if user:
             request.session["user"] = dict(user)
-        return RedirectResponse(url=redirect_after_login)
+        return RedirectResponse(url=state)
 
 
     @app.get(f"{login_base_path}/logout", include_in_schema=False)
@@ -175,3 +187,6 @@ def init_routes(
         login_url = request.url_for(LOGIN_FUNCTION)
         return RedirectResponse(url=login_url)
     return app
+
+
+

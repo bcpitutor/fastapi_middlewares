@@ -64,8 +64,8 @@ class iTutorGoogleSSORoutesMiddleware:
                 return 
             email: str = user.get("email")
             _, provider = email.split("@")
-            if provider != "itutor.com":
-               message = "Sorry, only @itutor.com email addresses are allowed."
+            if provider not in ["itutor.com", "fullmindlearning.com"]:
+               message = "Sorry, only @itutor.com and @fullmindlearning.com email addresses are allowed."
                response = RedirectResponse(f"{self.login_url}?error_message={str(message)}")
                await response(scope, receive, send)
                return 

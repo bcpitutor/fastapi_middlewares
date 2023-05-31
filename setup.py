@@ -18,9 +18,9 @@ setup(
         include_package_data = True,
         package_data={'fastapi_middlewares': ['statics/*', 'itutor_google_sso/templates/*']},
         install_requires=[
-            "Authlib==1.0.1", 
-            "httpx==0.23.0", 
-            "itsdangerous==2.1.2", 
+            "Authlib>=1.0.1", 
+            "httpx>=0.23.0", 
+            "itsdangerous>=2.1.2", 
             "jinja2>=3.1.1", 
             "fastapi>=0.75.2", 
         ],

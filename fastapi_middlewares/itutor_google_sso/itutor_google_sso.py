@@ -155,7 +155,7 @@ def init_routes(
     async def google_sso(request: Request, redirect_to: Optional[str] = None):
         # absolute url for callback
         # we will define it below
-        redirect_uri = request.url_for("auth")
+        redirect_uri = str(request.url_for("auth"))
         kwargs = {}
         if redirect_to:
             # Using state to pass the redirect_to url
@@ -168,7 +168,7 @@ def init_routes(
     async def google_sso_login(request: Request, error_message: Optional[str] = None, redirect_to: Optional[str] = None):
         # absolute url for callback
         # we will define it below
-        auth_url = request.url_for("google_sso")
+        auth_url = str(request.url_for("google_sso"))
         if redirect_to:
             auth_url += f"?{urlencode({'redirect_to': redirect_to})}"
         return templates.TemplateResponse(
@@ -194,7 +194,7 @@ def init_routes(
     @app.get(f"{login_base_path}/logout", include_in_schema=False)
     async def google_sso_logout(request: Request):
         request.session.pop("user", None)
-        login_url = request.url_for(LOGIN_FUNCTION)
+        login_url = str(request.url_for(LOGIN_FUNCTION))
         return RedirectResponse(url=login_url)
     return app
 

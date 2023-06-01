@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.7' 
+VERSION = '0.0.8' 
 DESCRIPTION = 'Package for google sso login in FastAPI'
 LONG_DESCRIPTION = 'Package for google sso login in FastAPI'
 
@@ -18,11 +18,11 @@ setup(
         include_package_data = True,
         package_data={'fastapi_middlewares': ['statics/*', 'itutor_google_sso/templates/*']},
         install_requires=[
-            "Authlib>=1.0.1", 
-            "httpx>=0.23.0", 
-            "itsdangerous>=2.1.2", 
-            "jinja2>=3.1.1", 
-            "fastapi>=0.75.2", 
+            "Authlib>=1.0.1",
+            "httpx>=0.23.0",
+            "itsdangerous>=2.1.2",
+            "jinja2>=3.1.1",
+            "fastapi>=0.75.2",
         ],
         url="https://github.com/bcpitutor/fastapi_middlewares",
         keywords=['google-sso', 'fastapi'],
